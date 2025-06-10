@@ -1,0 +1,20 @@
+{
+  "name": "conversational-booking-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.1.0",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "openai": "^5.2.0",
+    "playwright": "^1.52.0",
+    "readline-sync": "^1.4.10"
+  }
+}
