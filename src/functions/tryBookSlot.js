@@ -8,6 +8,8 @@ module.exports = async function tryBookSlot(name, email, datetime) {
     return { success: false, error: 'CALENDLY_URL is not defined in .env' };
   }
 
+  console.log("🌐 trying to book slot...");
+
   const dateObj = dayjs(datetime);
   const spokenDate = dateObj.format("dddd, MMMM D"); // e.g. "Monday, June 10"
   const timeStr = dateObj.format("h:mma").toLowerCase(); // e.g. "11:00am"
@@ -65,12 +67,37 @@ module.exports = async function tryBookSlot(name, email, datetime) {
 
     // Step 5: Confirm Booking
     try {
-      await page.waitForSelector('h1:has-text("You are scheduled")', { timeout: 8000 });
+      await page.waitForSelector('h1:has-text("You are scheduled")', { timeout: 10000 });
     } catch {
       await browser.close();
       return { success: false, error: 'confirmation_not_found' };
     }
 
+    await page.waitForSelector('[data-container="details"]', { timeout: 10000 });
+    const details = await page.locator('[data-container="details"]');
+     // Get title
+     const title = await details.locator('h2').textContent();
+
+     // Get host name
+     const host = await details.locator('span[class*="_t4Cl8Q2S5qLJhygL_f0"]').textContent();
+ 
+     // Get time slot
+     const timeRange = await details.locator('div').filter({ hasText: 'am' }).nth(0).textContent();
+ 
+     // Get time zone
+     const timeZone = await details.locator('span[class*="q_L_u3RPhr9wdVLh3MdY"]').textContent();
+ 
+     const linkHandle = await page.locator('span:has-text("Open Invitation")').locator('xpath=..'); // go up to likely <a>
+     const invitationLink = await linkHandle.getAttribute('href');
+ 
+     console.log("\n✅ Booking Confirmation Details:");
+     console.log(`📌 Title: ${title.trim()}`);
+     console.log(`👤 Host: ${host.trim()}`);
+     console.log(`🕒 Time: ${timeRange.trim()}`);
+     console.log(`🌍 Time Zone: ${timeZone.trim()}`);
+     console.log(`🔗 Invitation Link: ${invitationLink}`);
+
+     
     await browser.close();
     return { success: true };
 

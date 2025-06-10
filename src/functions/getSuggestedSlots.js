@@ -11,6 +11,7 @@ module.exports = async function getSuggestedSlots() {
   const page = await browser.newPage();
   const results = {};
 
+  console.log("🌐 trying to see schedule...");
   try {
     console.log("🌐 Navigating to Calendly...");
     await page.goto(CALENDLY_URL, { waitUntil: 'networkidle' });
@@ -49,7 +50,7 @@ module.exports = async function getSuggestedSlots() {
         break;
       }
     }
-
+    
     await browser.close();
     return { success: true, slots: results };
 
