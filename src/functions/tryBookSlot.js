@@ -9,9 +9,10 @@ module.exports = async function tryBookSlot(name, email, datetime) {
   }
 
 
-  console.log("🌐 trying to book slot...");
-
   const dateObj = dayjs(datetime);
+  if (!dateObj.isValid()) {
+    return { success: false, error: 'Invalid datetime. Use ISO format like "2025-06-12T11:00"' };
+  }
   const spokenDate = dateObj.format("dddd, MMMM D"); // e.g. "Monday, June 10"
   const timeStr = dateObj.format("h:mma").toLowerCase(); // e.g. "11:00am"
   if (!spokenDate || !timeStr) {
@@ -27,7 +28,7 @@ module.exports = async function tryBookSlot(name, email, datetime) {
   const timeButtonSelector = `button[data-container="time-button"][data-start-time="${timeStr}"]`;
 
   try {
-    console.log("🌐 Navigating to Calendly...");
+    console.log(`📨 Booking request for: ${name}, ${email} at ${spokenDate} ${timeStr}`);
     await page.goto(targetUrl, { waitUntil: 'networkidle' });
 
     // Step 1: Select Date
@@ -48,6 +49,7 @@ module.exports = async function tryBookSlot(name, email, datetime) {
       return { success: false, error: 'invalid_time' };
     }
 
+    console.log(`Time Slot found. Attempting to Book.`);
     // Step 3: Click "Next"
     try {
       await page.waitForSelector('button[aria-label^="Next"]', { timeout: 5000 });

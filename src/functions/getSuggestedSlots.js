@@ -36,11 +36,19 @@ module.exports = async function getSuggestedSlots(month = null, page = null) {
 
       results[dateStr] = times;
     }
+    if (Object.keys(results).length === 0) {
+      console.warn("⚠️ No available slots found.");
+    }
+
 
     if (ownedPage && browser) await browser.close();
     return { success: true, slots: results };
   } catch (err) {
-    if (ownedPage && browser) await browser.close();
     return { success: false, error: err.message };
+  } finally {
+    if (ownedPage && browser) {
+      await browser.close();
+      console.log("🚪 Browser closed (owned session).");
+    }
   }
 };
