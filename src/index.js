@@ -17,11 +17,18 @@ async function main() {
 
     try {
       const response = await runAssistant(userInput, conversationHistory);
+
+      if (response.end) {
+        console.log("Chrono: 👋 Ending session after booking.");
+        break;
+      }
+
       console.log(`Chrono: ${response}`);
 
       // Save this turn in the conversation history
       conversationHistory.push({ role: 'user', content: userInput });
       conversationHistory.push({ role: 'assistant', content: response });
+
     } catch (err) {
       console.error("❌ Error talking to Chrono:", err.message);
     }

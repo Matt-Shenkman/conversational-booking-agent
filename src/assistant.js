@@ -6,19 +6,29 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const getSuggestedSlots  = require('./functions/getSuggestedSlots');
+const getSlotsForMonths  = require('./functions/getSlotsForMonths');
 const tryBookSlot = require('./functions/tryBookSlot');
-  
-  const functionSchemas = [
+const dayjs = require('dayjs');
+const todayStr = dayjs().format('MMMM D, YYYY'); // e.g., "June 9, 2025" 
+
+const functionSchemas = [
     {
       type: "function",
       function: {
-        name: "getSuggestedSlots",
-        description: "Fetch a list of upcoming available scheduled time slots.",
-        parameters: {
-          type: "object",
-          properties: {},
-          required: []
+          name: "getSlotsForMonths",
+          description: "Fetch a list of available Calendly time slots. Optionally filter by one or more ISO months (YYYY-MM).",
+          parameters: {
+            type: "object",
+            properties: {
+              months: {
+                type: "array",
+                items: {
+                  type: "string",
+                  pattern: "^\\d{4}-\\d{2}$"  // Matches 'YYYY-MM'
+                },
+                description: "Optional array of ISO 8601 month strings like ['2025-06', '2025-07']"
+              }
+            }
         }
       }
     },
@@ -54,18 +64,33 @@ const tryBookSlot = require('./functions/tryBookSlot');
   const systemPrompt = `
   You are Chrono, a helpful AI assistant that schedules meetings for users.
   
-  Your goal is to collect:
+  📅 Today is ${todayStr}.
+  
+  Your goal is to help the user schedule an appointment by collecting:
   - Full name
   - Email
   - Desired appointment date and time
   
-  Only call \`tryBookSlot\` once **all three** are collected and the user confirms they are ready to book.
+  🔁 **Function Calls**
+  - Only call \`tryBookSlot\` once all three values are collected **and** the user confirms they are ready to book.
+  - If the user requests to view available times, call \`getSlotsForMonths\`.
   
-  If the user wants to see available times or the schedule, call \`getSuggestedSlots\`.
+  🗓 **Availability Rules**
+  - When calling \`getSlotsForMonths\`, you may pass an optional array of specific months (formatted as 'YYYY-MM').
+  - If no months are specified, default to the current month through two months from now.
+  - ❗️Do NOT allow users to query or book any date beyond two months from the current date.
+  - You must validate that the requested date is within the current month or the next two months. 
+  - If it is not, **do not throw an error** — instead, gently inform them that bookings are only available for the current and next two months and ask them to choose a closer date.
   
-  Only call \`getSuggestedSlots\` once per conversation, unless \`tryBookSlot\` fails with error type \`invalid_date\` or \`invalid_time\`.
+  ⚠️ **Date Validity Constraint**
+  - If available slots have already been fetched using \`getSlotsForMonths\`, you must only allow booking on a date that was part of that availability.
+  - Do not accept a booking for a date that has not been confirmed as available unless \`getSlotsForMonths\` has not been used yet or is re-requested with an updated month.
   
-  Be conversational and clarify ambiguous input. Confirm before scheduling.
+  🧠 **Behavior**
+  - Be conversational, clarify any vague or missing inputs, and confirm all details before scheduling.
+  - Do not call \`getSlotsForMonths\` more than once per conversation, unless:
+    - \`tryBookSlot\` fails with \`invalid_date\` or \`invalid_time\`, or
+    - The user specifically asks for different months.
   `;
   
   
@@ -91,21 +116,21 @@ const tryBookSlot = require('./functions/tryBookSlot');
         const toolArgs = JSON.parse(toolCall.function.arguments || "{}");
         let toolResult;
       
-        if (toolCall.function.name === "getSuggestedSlots") {
-          toolResult = await getSuggestedSlots();
+        console.log(`🛠️ Tool call: ${toolCall.function.name}`, toolArgs);
+      
+        if (toolCall.function.name === "getSlotsForMonths") {
+          toolResult = await getSlotsForMonths(toolArgs.months);
         } else if (toolCall.function.name === "tryBookSlot") {
-            toolResult = await tryBookSlot(toolArgs.name, toolArgs.email, toolArgs.datetime);
-
-            if (!toolResult.success) {
-                console.log("❌ Booking failed:", toolResult.error, toolResult.detail || "");
-            } else {
-                console.log("✅ Booking confirmed!");
-                return "Your appointment is confirmed. Thank you!";
-            }
+          toolResult = await tryBookSlot(toolArgs.name, toolArgs.email, toolArgs.datetime);
+      
+          if (!toolResult.success) {
+            console.log("❌ Booking failed:", toolResult.error, toolResult.detail || "");
+          } else {
+            return { end: true, message: "Thanks for booking with Chrono" };
+          }
         }
       
-        // Now add the tool result to the conversation
-        messages.push(message); // <-- push assistant message with tool_calls
+        messages.push(message);
         messages.push({
           role: "tool",
           tool_call_id: toolCall.id,

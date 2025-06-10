@@ -8,15 +8,18 @@ module.exports = async function tryBookSlot(name, email, datetime) {
     return { success: false, error: 'CALENDLY_URL is not defined in .env' };
   }
 
+
   console.log("🌐 trying to book slot...");
 
   const dateObj = dayjs(datetime);
   const spokenDate = dateObj.format("dddd, MMMM D"); // e.g. "Monday, June 10"
   const timeStr = dateObj.format("h:mma").toLowerCase(); // e.g. "11:00am"
-
   if (!spokenDate || !timeStr) {
     return { success: false, error: 'Invalid datetime format. Use ISO format like "2025-06-12T11:00"' };
   }
+  const month = dateObj.format("YYYY-MM");
+  const targetUrl = month ? `${CALENDLY_URL}?month=${month}` : CALENDLY_URL;
+
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
@@ -25,7 +28,7 @@ module.exports = async function tryBookSlot(name, email, datetime) {
 
   try {
     console.log("🌐 Navigating to Calendly...");
-    await page.goto(CALENDLY_URL, { waitUntil: 'networkidle' });
+    await page.goto(targetUrl, { waitUntil: 'networkidle' });
 
     // Step 1: Select Date
     try {
@@ -87,9 +90,16 @@ module.exports = async function tryBookSlot(name, email, datetime) {
      // Get time zone
      const timeZone = await details.locator('span[class*="q_L_u3RPhr9wdVLh3MdY"]').textContent();
  
-     const linkHandle = await page.locator('span:has-text("Open Invitation")').locator('xpath=..'); // go up to likely <a>
-     const invitationLink = await linkHandle.getAttribute('href');
- 
+      // Click the button with text "Open Invitation"
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        page.locator('button:has-text("Open Invitation")').click()
+      ]);
+      
+      await newPage.waitForLoadState('domcontentloaded');
+      const invitationLink = newPage.url();
+      
+
      console.log("\n✅ Booking Confirmation Details:");
      console.log(`📌 Title: ${title.trim()}`);
      console.log(`👤 Host: ${host.trim()}`);
