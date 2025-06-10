@@ -1,6 +1,6 @@
-# 🕒 Chrono: Conversational Scheduling Assistant
+# Chrono: Conversational Scheduling Assistant
 
-Chrono is a conversational AI assistant that helps users find and book available Calendly time slots through natural dialogue. It uses OpenAI's GPT to understand user intent and Playwright to automate interactions with Calendly.
+Chrono (named after greek god of time Chronos) is a conversational AI assistant that helps users find and book available Calendly time slots through natural dialogue. It uses OpenAI's GPT to understand user intent and Playwright to automate interactions with Calendly.
 
 ---
 
@@ -63,11 +63,11 @@ Type messages into the console. Type `exit` to quit.
 
 ```
 .
-├── assistant.js              # OpenAI integration and routing logic
+├── assistant.js             # OpenAI integration and routing logic
 ├── functions/
-│   ├── getSlotsForMonths.js # Handles multi-month slot retrieval
+│   ├── getSlotsForMonths.js # Handles multi-month slot retrieval in parrallel
 │   └── tryBookSlot.js       # Automates Calendly booking
-├── getSuggestedSlots.js     # Scrapes time slots for a given month
+│   └── getSuggestedSlots.js # Scrapes time slots for a given month
 ├── index.js                 # Main CLI interface
 ├── .env                     # Environment configuration
 └── README.md
@@ -79,9 +79,9 @@ Type messages into the console. Type `exit` to quit.
 
 - Defaults to querying the **current month plus two** if no months are specified.
 - Assistant only allows booking of times that were confirmed as available.
-- Assistant will **only call `getSlotsForMonths` once per session**, unless:
+- Assistant will **only call `getSlotsForMonths` once per session if specified**, unless:
   - A booking fails due to an invalid date/time
-  - The user explicitly requests availability for another month
+  - The user explicitly requests availability for another month that wasn't previously queried.
 - User must **confirm name, email, and time** before a booking is attempted.
 
 ---
@@ -104,6 +104,7 @@ Chrono: ✅ Booking confirmed!
 - If scraping fails, inspect or update selectors in `getSuggestedSlots.js` and `tryBookSlot.js`.
 - Use `console.log` in each function to trace behavior.
 - Use `DEBUG=1 node index.js` to add your own conditional logs.
+- I left debug statements on for now as they provide additional context on to requests. Would turn them off in prod.
 
 ---
 
@@ -111,7 +112,6 @@ Chrono: ✅ Booking confirmed!
 
 - [ ] Add web UI or chatbot interface
 - [ ] Add rescheduling/cancellation support
-- [ ] Integrate email or SMS notifications
 - [ ] Improve test coverage and add CI/CD
 
 ---
@@ -123,3 +123,6 @@ MIT License (or your preferred license)
 ---
 
 **Chrono** — Bringing intelligent time management to your fingertips.
+
+
+
