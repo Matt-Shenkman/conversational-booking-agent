@@ -5,18 +5,13 @@ const { runAssistant } = require("./assistant");
 async function main() {
   console.log("==================================");
   console.log("🤖 Chrono — Your Scheduling Assistant");
-  console.log("Type your request to begin. Type 'exit' to quit.");
+  console.log("Type your request to begin.");
   console.log("==================================");
 
   const conversationHistory = [];
 
   while (true) {
     const userInput = readline.question("\nYou: ").trim();
-
-    if (userInput.toLowerCase() === "exit") {
-      console.log("👋 Goodbye! See you next time.");
-      break;
-    }
 
     if (userInput === "") {
       console.log("⚠️ Please enter a valid message.");

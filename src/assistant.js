@@ -46,7 +46,8 @@ async function runAssistant(userInput, conversationHistory = []) {
       toolResult = await tryBookSlot(
         toolArgs.name,
         toolArgs.email,
-        toolArgs.datetime
+        toolArgs.datetime,
+        toolArgs.additionalQuestions
       );
 
       if (!toolResult.success) {
@@ -62,6 +63,11 @@ async function runAssistant(userInput, conversationHistory = []) {
             "✅ Your appointment has been booked. Thank you for using Chrono!",
         };
       }
+    } else if (toolCall.function.name === "exitConversation") {
+      return {
+        end: true,
+        content: toolArgs.farewell_message,
+      };
     }
 
     messages.push(message);
