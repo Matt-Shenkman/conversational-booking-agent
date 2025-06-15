@@ -1,6 +1,6 @@
-require('dotenv').config();
-const readline = require('readline-sync');
-const { runAssistant } = require('./assistant');
+require("dotenv").config();
+const readline = require("readline-sync");
+const { runAssistant } = require("./assistant");
 
 async function main() {
   console.log("==================================");
@@ -13,12 +13,12 @@ async function main() {
   while (true) {
     const userInput = readline.question("\nYou: ").trim();
 
-    if (userInput.toLowerCase() === 'exit') {
+    if (userInput.toLowerCase() === "exit") {
       console.log("👋 Goodbye! See you next time.");
       break;
     }
 
-    if (userInput === '') {
+    if (userInput === "") {
       console.log("⚠️ Please enter a valid message.");
       continue;
     }
@@ -33,9 +33,8 @@ async function main() {
 
       console.log(`Chrono: ${response}`);
 
-      conversationHistory.push({ role: 'user', content: userInput });
-      conversationHistory.push({ role: 'assistant', content: response });
-
+      conversationHistory.push({ role: "user", content: userInput });
+      conversationHistory.push({ role: "assistant", content: response });
     } catch (err) {
       console.error("❌ Error talking to Chrono:", err.message);
     }
