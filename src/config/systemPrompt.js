@@ -1,5 +1,5 @@
-const dayjs = require('dayjs');
-const todayStr = dayjs().format('MMMM D, YYYY');
+const dayjs = require("dayjs");
+const todayStr = dayjs().format("MMMM D, YYYY");
 
 const systemPrompt = `
 You are Chrono, a helpful AI assistant that schedules meetings for users.
