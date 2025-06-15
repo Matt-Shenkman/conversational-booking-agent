@@ -46,7 +46,8 @@ async function runAssistant(userInput, conversationHistory = []) {
       toolResult = await tryBookSlot(
         toolArgs.name,
         toolArgs.email,
-        toolArgs.datetime
+        toolArgs.datetime,
+        toolArgs.additionalQuestions
       );
 
       if (!toolResult.success) {

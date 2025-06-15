@@ -44,6 +44,14 @@ const functionSchemas = [
             description:
               "Desired appointment time in ISO format. Example: 2025-06-15T14:00",
           },
+          additionalQuestions: {
+            type: "object",
+            description:
+              "Additional questions required by the booking form. Keys should match field names like 'question_1', 'question_2', etc.",
+            additionalProperties: {
+              type: "string",
+            },
+          },
         },
         required: ["name", "email", "datetime"],
       },

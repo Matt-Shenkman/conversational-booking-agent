@@ -56,7 +56,7 @@ module.exports = async function getSlotsForMonths(monthList = []) {
     }
   }
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: false });
   console.log("🌐 Browser launched. Fetching pages...");
 
   try {
