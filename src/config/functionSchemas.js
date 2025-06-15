@@ -49,6 +49,24 @@ const functionSchemas = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "exitConversation",
+      description:
+        "End the conversation when the user wants to quit, exit, leave, or says goodbye",
+      parameters: {
+        type: "object",
+        properties: {
+          farewell_message: {
+            type: "string",
+            description: "A friendly goodbye message to the user",
+          },
+        },
+        required: ["farewell_message"],
+      },
+    },
+  },
 ];
 
 module.exports = functionSchemas;

@@ -1,5 +1,6 @@
 module.exports = async function getSuggestedSlots(month = null, page = null) {
-  const CALENDLY_URL = process.env.CALENDLY_URL;
+  const CALENDLY_URL =
+    process.env.CALENDLY_URL || "https://calendly.com/myaifrontdesk/ruchir";
   if (!CALENDLY_URL) return { success: false, error: "CALENDLY_URL not set" };
 
   let browser = null;
